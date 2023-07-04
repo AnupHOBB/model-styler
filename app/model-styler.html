@@ -1,0 +1,351 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <script type="importmap">
+            {
+                "imports":
+                {
+                    "three": "../node_modules/three/src/Three.js",
+					"gltf-loader": "../node_modules/three/examples/jsm/loaders/GLTFLoader.js",
+					"draco-loader": "../node_modules/three/examples/jsm/loaders/DRACOLoader.js",
+                    "engine": "../engine/Engine.js"
+                }
+            }
+        </script>
+        <script type="module" src="model-styler.js"></script>
+        <style>
+            body
+            {
+                background-color: rgb(0, 0, 0);
+                overflow: hidden;
+            }
+
+            canvas
+            {
+                position: absolute;
+                top: 0%;
+                left: 0%;
+            }
+
+            @media screen and (max-aspect-ratio : 1/1) and (max-width : 600px)
+            {
+                #color-menu-container
+                {
+                    position: absolute;
+                    bottom: 7.5%; 
+                    left: 0%;
+                    width: 100%;
+                    z-index: 0.5;
+                }
+            }
+
+            @media screen and (max-aspect-ratio : 1/1) and (min-width : 600px)
+            {
+                #color-menu-container
+                {
+                    position: absolute;
+                    bottom: 10%; 
+                    left: 0%;
+                    width: 100%;
+                    z-index: 2;
+                }
+            }
+
+            @media screen and (min-aspect-ratio : 1/1) and (max-height : 600px)
+            {
+                #color-menu-container
+                {
+                    position: absolute;
+                    bottom: 12%;
+                    left: 0%;
+                    width: 100%;
+                    z-index: 2;
+                }
+            }
+
+            @media screen and (min-aspect-ratio : 1/1) and (min-height : 600px)
+            {
+                #color-menu-container
+                {
+                    position: absolute;
+                    bottom: 8%;
+                    left: 0%;
+                    width: 100%;
+                    z-index: 2;
+                }
+            }
+
+            #color-menu-outer
+            {
+                display: block;
+                margin: auto;
+            }
+
+            @media screen and (max-aspect-ratio : 1/1) and (max-width : 700px)
+            {
+                #color-menu
+                {
+                    display: flex;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    gap: 1%;
+                    height: 100%;
+                    margin: auto;
+                    width: 90%;
+                    background-color: rgba(0, 0, 0, 0);
+                    border-radius: 2ch;
+                }
+            }
+
+            @media screen and (max-aspect-ratio : 1/1) and (min-width : 700px)
+            {
+                #color-menu
+                {
+                    display: flex;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    gap: 1%;
+                    height: 100%;
+                    margin: auto;
+                    width: 70%;
+                    background-color: rgba(0, 0, 0, 0);
+                    border-radius: 2ch;
+                }
+            }
+
+            @media screen and (min-aspect-ratio : 1/1) and (max-width : 700px) and (max-height : 600px)
+            {
+                #color-menu
+                {
+                    display: flex;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    gap: 1%;
+                    height: 100%;
+                    margin: auto;
+                    width: 50%;
+                    min-width: 200px;
+                    background-color: rgba(0, 0, 0, 0);
+                    border-radius: 2ch;
+                }
+            }
+
+            @media screen and (min-aspect-ratio : 1/1) and (min-width : 700px) and (max-height : 600px)
+            {
+                #color-menu
+                {
+                    display: flex;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    gap: 2%;
+                    height: 100%;
+                    margin: auto;
+                    width: 40%;
+                    max-width: 500px;
+                    background-color: rgba(0, 0, 0, 0);
+                    border-radius: 2ch;
+                }
+            }
+
+            @media screen and (min-aspect-ratio : 1/1) and (max-width : 700px) and (min-height : 600px)
+            {
+                #color-menu
+                {
+                    display: flex;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    gap: 6%;
+                    height: 100%;
+                    margin: auto;
+                    width: 40%;
+                    min-width: 550px;
+                    background-color: rgba(0, 0, 0, 0);
+                    border-radius: 2ch;
+                }
+            }
+
+            @media screen and (min-aspect-ratio : 1/1) and (min-width : 700px) and (max-width : 1000px) and (min-height : 600px)
+            {
+                #color-menu
+                {
+                    display: flex;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    gap: 2%;
+                    height: 100%;
+                    margin: auto;
+                    width: 30%;
+                    min-width: 500px;
+                    background-color: rgba(0, 0, 0, 0);
+                    border-radius: 2ch;
+                }
+            }
+
+            @media screen and (min-aspect-ratio : 1/1) and (min-width : 1000px) and (max-width : 1400px) and (min-height : 600px)
+            {
+                #color-menu
+                {
+                    display: flex;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    gap: 2%;
+                    height: 100%;
+                    margin: auto;
+                    width: 30%;
+                    min-width: 500px;
+                    background-color: rgba(0, 0, 0, 0);
+                }
+            }
+
+            @media screen and (min-aspect-ratio : 1/1) and (min-width : 1400px) and (min-height : 600px)
+            {
+                #color-menu
+                {
+                    display: flex;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    gap: 1%;
+                    height: 100%;
+                    margin: auto;
+                    width: 30%;
+                    min-width: 500px;
+                    background-color: rgba(0, 0, 0, 0);
+                }
+            }
+
+            @media screen and (max-height : 400px)
+            {
+                .color-item
+                {
+                    display: block;
+                    margin: auto;
+                    width: 40px; 
+                    height: 40px;
+                    border-radius: 50%;
+                    border-width: 0.25ch;
+                    border-style: solid;
+                    border-color: rgb(243, 243, 243);
+                }
+            }
+
+            @media screen and (max-width : 400px) and (min-height : 400px)
+            {
+                .color-item
+                {
+                    display: block;
+                    margin: auto;
+                    width: 40px; 
+                    height: 40px;
+                    border-radius: 50%;
+                    border-width: 0.25ch;
+                    border-style: solid;
+                    border-color: rgb(243, 243, 243);
+                }
+            }
+
+            @media screen and (min-width : 400px) and (max-height : 600px)
+            {
+                .color-item
+                {
+                    display: block;
+                    margin: auto;
+                    width: 40px; 
+                    height: 40px;
+                    border-radius: 50%;
+                    border-width: 0.25ch;
+                    border-style: solid;
+                    border-color: rgb(243, 243, 243);
+                }
+            }
+
+            @media screen and (min-width : 400px) and (max-width : 500px) and (min-height : 600px)
+            {
+                .color-item
+                {
+                    display: block;
+                    margin: auto;
+                    width: 60px; 
+                    height: 60px;
+                    border-radius: 50%;
+                    border-width: 0.25ch;
+                    border-style: solid;
+                    border-color: rgb(243, 243, 243);
+                }
+            }
+
+            @media screen and (min-width : 500px) and (min-height : 600px)
+            {
+                .color-item
+                {
+                    display: block;
+                    margin: auto;
+                    width: 5vh; 
+                    height: 5vh;
+                    border-radius: 50%;
+                    border-width: 0.25ch;
+                    border-style: solid;
+                    border-color: rgb(243, 243, 243);
+                }
+            }
+
+            @media screen and (max-width: 600px)
+            {
+                .color-item-label
+                {
+                    width: 100%;
+                    font-family: 'Trade Gothic LT Std', sans-serif;
+                    font-size: 2vw;
+                    text-align: center;
+                    color: rgb(243, 243, 243);
+                }
+            }
+
+            @media screen and (min-width: 600px) and (max-width: 1100px)
+            {
+                .color-item-label
+                {
+                    width: 100%;
+                    font-family: 'Trade Gothic LT Std', sans-serif;
+                    font-size: 1.2vw;
+                    text-align: center;
+                    color: rgb(243, 243, 243);
+                }
+            }
+
+            @media screen and (min-width: 1100px)
+            {
+                .color-item-label
+                {
+                    width: 100%;
+                    font-family: 'Trade Gothic LT Std', sans-serif;
+                    font-size: 1vw;
+                    text-align: center;
+                    color: rgb(243, 243, 243);
+                }
+            }
+
+            .color-item-container { width: 20%; }
+        </style>
+    </head>
+    <body>
+        <canvas></canvas>
+        <div id="color-menu-container">
+            <div id="color-menu-outer">
+                <div id="color-menu">
+                    <div class="color-item-container">
+                        <img id="texture-item0" class="color-item" src="../assets/00_Fab_13.png"></img>
+                        <p class="color-item-label">Texture1</p>
+                    </div>
+                    <div class="color-item-container">
+                        <img id="texture-item1" class="color-item" src="../assets/00_Fab_14.png"></img>
+                        <p class="color-item-label">Texture2</p>
+                    </div>
+                    <div class="color-item-container">
+                        <img id="texture-item2" class="color-item" src="../assets/00_Fab_15.png"></img>
+                        <p class="color-item-label">Texture3</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
