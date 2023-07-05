@@ -10,6 +10,8 @@ window.onload = () =>
     const ENV_MAP_PATH = 'CGSkies_0339_freecopy.webp'
     const MODEL_PATH = '1bhk.glb'
     const TEXTURES_PATHS = ['00_Fab_13.png', '00_Fab_14.png', '00_Fab_15.png']
+    const Y_OFFSET = -99
+
     const textures = []
     let selectedModel
     let loader = new ENGINE.AssetLoader()
@@ -25,7 +27,6 @@ window.onload = () =>
     {
         let sceneManager = new ENGINE.SceneManager(document.querySelector('canvas'))
         let cameraManager = new ENGINE.StaticCameraManager('Camera', 50)
-        cameraManager.setPosition(-2, 1.5, 4)
         sceneManager.register(cameraManager)
         sceneManager.setActiveCamera('Camera')
         let ambientLight = new ENGINE.AmbientLight('AmbientLight', new THREE.Color(1, 1, 1), 1)
@@ -34,6 +35,7 @@ window.onload = () =>
         sceneManager.register(input)
         cameraManager.registerInput(input)
         let model = new ENGINE.MeshModel('Model', assetMap.get('Model'), true)
+        model.setPosition(2, -1.5, -4)
         model.applyEnvmap(assetMap.get('Envmap'))
         model.enableRayCastingOnTriMesh(true)
         sceneManager.register(model)
@@ -51,10 +53,10 @@ window.onload = () =>
 
         let canvas = document.querySelector('canvas')
         canvas.addEventListener('click', e => {
-            let rasterCoord = { x: e.screenX, y: e.screenY }
-            let hitData = sceneManager.shootRay(rasterCoord)
-            selectedModel = hitData[0].object
-            console.log(selectedModel)
+            let rasterCoord = { x: e.screenX, y: e.screenY + Y_OFFSET }
+            let hitData = sceneManager.shootRayFromCamera(rasterCoord, true)
+            if (hitData.length > 0)
+                selectedModel = hitData[0].object
         })
     })
 }

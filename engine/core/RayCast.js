@@ -43,16 +43,27 @@ export class RayCast
     }
 
     /**
-     * Raycasts among objects and returns the hit point.
-     * @param {THREE.Vector2} rasterCoord raster coordinate that is used as the ray cast origin point
+     * Raycasts among objects and returns the array of hit point data.
+     * @param {THREE.Vector2} ndcCoord 2D coordinates in normalized device coordinates (NDC)---X and Y components should be between -1 and 1.
      * @param {CameraManager} cameraManager BaseCameraManager object
      * @returns {any} object that holds the intersection data of all the hit objects
      */
-    raycast(rasterCoord, cameraManager)
+    raycastFromCamera(ndcCoord, cameraManager)
     {
-        let screenSpaceX = (rasterCoord.x / window.innerWidth) *  2 - 1
-        let screenSpaceY = -(rasterCoord.y / window.innerHeight) *  2 + 1
-        this.raycaster.setFromCamera({ x: screenSpaceX, y: screenSpaceY }, cameraManager.getCamera())
+        this.raycaster.setFromCamera(ndcCoord, cameraManager.getCamera())
+        let hitObjects = this.raycaster.intersectObjects(this.raycastObjects)
+        return (hitObjects.length > 0) ? hitObjects : []
+    }
+
+    /**
+     * Raycasts among objects from origin and along the direction and returns the array of hit point data.
+     * @param {THREE.Vector3} origin ray origin
+     * @param {THREE.Vector3} direction ray direction
+     * @returns {any} object that holds the intersection data of all the hit objects
+     */
+    raycast(origin, direction)
+    {
+        this.raycaster.set(origin, direction)
         let hitObjects = this.raycaster.intersectObjects(this.raycastObjects)
         return (hitObjects.length > 0) ? hitObjects : []
     }

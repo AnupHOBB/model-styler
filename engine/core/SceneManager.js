@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { RayCast } from './RayCast.js'
 import { SceneRenderer } from './SceneRenderer.js'
+import { Maths } from '../helpers/maths.js'
 
 /**
  * Parent class for all actors, camera managers and any object that appears as part of the scene
@@ -168,134 +169,14 @@ export class SceneObjectGroup extends SceneObject
 }
 
 /**
- * Wraps SceneCore object.
- */
-export class SceneManager
-{
-    /**
-     * @param {HTMLCanvasElement} canvas HTML canvas element
-     */
-    constructor(canvas) { this.core = new SceneCore(canvas, this) }
-
-    /**
-     * Delegates call to SceneCore's register.
-     * @param {SceneObject} sceneObject sceneObject that needs to be registered in the scene manager
-     */
-    register(sceneObject) { this.core.register(sceneObject) }
-
-    /**
-     * Delegates call to SceneCore's unregister.
-     * @param {String} name name of the sceneObject that is registered in the scene manager.
-     */
-    unregister(name) { this.core.unregister(name) }
-
-    /**
-     * Delegates call to SceneCore's worldToView.
-     * @param {THREE.Vector3} worldPosition position of point in world whose raster coordinate is required
-     * @returns {THREE.Vector3} view space coordinate of the point whose world coordinate was given
-     */
-    worldToView(worldPosition) { return this.core.worldToView(worldPosition) }
-
-    /**
-     * Delegates call to SceneCore's worldToRaster.
-     * @param {THREE.Vector3} worldPosition position of point in world whose raster coordinate is required
-     * @returns {THREE.Vector2} array of hit info data
-     */
-    worldToRaster(worldPosition) { return this.core.worldToRaster(worldPosition) }
-
-    /**
-     * Delegates call to SceneCore's shootRay.
-     * @param {THREE.Vectorw} rasterCoord screen position from where the ray will be shot into the scene
-     * @returns {Array} array of hit info data
-     */
-    shootRay(rasterCoord) { return this.core.shootRay(rasterCoord) }
-    
-    /**
-     * Delegates call to SceneCore's setActiveCamera.  
-     * @param {String} name name of the camera to be activated. 
-     */
-    setActiveCamera(name) { this.core.setActiveCamera(name) }
-
-    /**
-     * Delegates call to SceneCore's broadcastTo.  
-     * @param {String} from name of the object that broadcasted the data
-     * @param {String} to name of the object that should receive the data
-     * @param {any} data data to be received by the receiver
-     */
-    broadcastTo(from, to, data) { this.core.broadcastTo(from, to, data) }
-
-    /**
-     * Delegates call to SceneCore's broadcastToAll.   
-     * @param {String} from name of the object that broadcasted the data
-     * @param {any} data data to be received by all objects
-     */
-    broadcastToAll(from, data) { this.core.broadcastToAll(from, data) }
-
-    setEnvironmentMap(envmap) { this.core.setEnvironmentMap(envmap) }
-
-    setBloomPercentage(percent) { this.core.setBloomPercentage(percent) }
-
-    setBloomIntensity(intensity) { this.core.setBloomIntensity(intensity) }
-
-    setBloomThreshold(threshold) { this.core.setBloomThreshold(threshold) }
-
-    setBloomRadius(radius) { this.core.setBloomRadius(radius) }
-
-    enableSSAO(enable) { this.core.enableSSAO(enable) }
-
-    setSSAORadius(radius) { this.core.setSSAORadius(radius) }
-
-    setSSAOMinDistance(minDist) { this.core.setSSAOMinDistance(minDist) }
-
-    setSSAOMaxDistance(maxDist) { this.core.setSSAOMaxDistance(maxDist) }
-
-    setSSAOShowAOMap(show) { this.core.setSSAOShowAOMap(show) }
-
-    setSSAOShowNormalMap(show) { this.core.setSSAOShowNormalMap(show) }
-
-    setSharpness(sharpness) { this.core.setSharpness(sharpness) }
-
-    enableFXAA(enable) { this.core.enableFXAA(enable) }
-
-    enableSSAA(enable) { this.core.enableSSAA(enable) }
-
-    setSSAASampleLevel(samplelevel) { this.core.setSSAASampleLevel(samplelevel) }
-
-    setShadowsColorBalance(shadowsRgb) { this.core.setShadowsColorBalance(shadowsRgb) }
-
-    setMidtonesColorBalance(midtonesRgb) { this.core.setMidtonesColorBalance(midtonesRgb) }
-
-    setHighlightsColorBalance(highlightsRgb) { this.core.setHighlightsColorBalance(highlightsRgb) }
-
-    setToneMapping(toneMapping) { this.core.setToneMapping(toneMapping) }
-
-    setExposure(exposure) { this.core.setExposure(exposure) }
-
-    setSaturation(saturation) { this.core.setSaturation(saturation) }
-
-    setContrast(contrast) { this.core.setContrast(contrast) }
-    
-    setBrightness(brightness) { this.core.setBrightness(brightness) }
-
-    setGamma(gamma) { this.core.setGamma(gamma) }
-
-    showStats(htmlElement) { this.core.showStats(htmlElement) }
-}
-
-/**
  * Manages the render loop, notifies the scene objects when they ae registered and on every frame and
  * facilitates messaging between scene objects.
  */
-class SceneCore
+export class SceneManager
 {
-    /**
-     * @param {HTMLCanvasElement} canvas HTML canvas element
-     * @param {SceneManager} sceneManager the SceneManager object
-     */
-    constructor(canvas, sceneManager)
+    constructor(canvas)
     {
-        this.sceneManager = sceneManager
-        this.raycast = new RayCast()
+        this.raycaster = new RayCast()
         this.activeCameraManager = null
         this.sceneObjectMap = new Map()
         this.inactiveObjNameMap = new Map()
@@ -317,7 +198,7 @@ class SceneCore
         else if (sceneObject.isReady())
         {
             this.addToScene(sceneObject)     
-            sceneObject.onSceneStart(this.sceneManager)
+            sceneObject.onSceneStart(this)
         }
         this.checkForMessages(sceneObject)
     }
@@ -332,7 +213,7 @@ class SceneCore
         if (sceneObject != undefined)
         {
             this.removeFromScene(sceneObject)
-            sceneObject.onSceneEnd(this.sceneManager)
+            sceneObject.onSceneEnd(this)
             this.sceneObjectMap.delete(name)
         }
     }
@@ -347,7 +228,7 @@ class SceneCore
         if (messages != undefined)
         {
             for (let message of messages)
-                sceneObject.onMessage(this.sceneManager, message.from, message.data)
+                sceneObject.onMessage(this, message.from, message.data)
             this.messageMap.delete(sceneObject.name)
         }
     }
@@ -369,14 +250,22 @@ class SceneCore
     /**
      * Returns the data of all the objects hit by the ray. The data will be in this format:
      * { distance, point, face, faceIndex, object }
-     * @param {THREE.Vectorw} rasterCoord screen position from where the ray will be shot into the scene
+     * @param {THREE.Vector2} rasterCoord screen position from where the ray will be shot into the scene
+     * @param {Boolean} outlineNearest outlines the nearest hit object
      * @returns {Array} array of hit info data
      */
-    shootRay(rasterCoord)
+    shootRayFromCamera(rasterCoord, outlineNearest)
     {
         if (rasterCoord != undefined && rasterCoord.x >= 0 && rasterCoord.x < window.innerWidth 
             && rasterCoord.y >= 0 && rasterCoord.y < window.innerHeight)
-            return this.raycast.raycast(rasterCoord, this.activeCameraManager)
+        {   
+            let ndcX = (rasterCoord.x / window.innerWidth) *  2 - 1
+            let ndcY = -(rasterCoord.y / window.innerHeight) *  2 + 1
+            let hitPointData = this.raycaster.raycastFromCamera({ x: ndcX, y: ndcY }, this.activeCameraManager)
+            if (outlineNearest != undefined && outlineNearest != null && outlineNearest && hitPointData.length > 0)
+                this.sceneRenderer.outlineObjects([hitPointData[0].object], this.activeCameraManager.getCamera()) 
+            return hitPointData
+        }
         else
             return []
     }
@@ -391,7 +280,7 @@ class SceneCore
         if (cameraManager != null && cameraManager != undefined)
         {
             this.activeCameraManager = cameraManager
-            this.activeCameraManager.onActive(this.sceneManager)
+            this.activeCameraManager.onActive(this)
             this.sceneRenderer.setup(this.activeCameraManager.getCamera())
         }
     }
@@ -406,7 +295,7 @@ class SceneCore
     {
         let sceneObject = this.sceneObjectMap.get(to)
         if (sceneObject != undefined)
-            sceneObject.onMessage(this.sceneManager, from, data)
+            sceneObject.onMessage(this, from, data)
         else 
         {    
             let messages = this.messageMap.get(to)
@@ -427,7 +316,7 @@ class SceneCore
         let sceneObjectKeys = this.sceneObjectMap.keys()
         for (let sceneObjectKey of sceneObjectKeys)
             if (sceneObjectKey != from)
-                this.sceneObjectMap.get(sceneObjectKey).onMessage(this.sceneManager, from, data)     
+                this.sceneObjectMap.get(sceneObjectKey).onMessage(this, from, data)     
     }
 
     setEnvironmentMap(envmap) { this.sceneRenderer.setEnvironmentMap(envmap) }
@@ -505,7 +394,7 @@ class SceneCore
     {
         let sceneObjects = this.sceneObjectMap.values()
         for (let sceneObject of sceneObjects)
-            sceneObject.onSceneRender(this.sceneManager)
+            sceneObject.onSceneRender(this)
     }
 
     /**
@@ -522,7 +411,7 @@ class SceneCore
                 if (sceneObject.isReady())
                 {   
                     this.addToScene(sceneObject)
-                    sceneObject.onSceneStart(this.sceneManager)
+                    sceneObject.onSceneStart(this)
                     this.inactiveObjNameMap.delete(sceneObjectName)
                 } 
             }
@@ -541,7 +430,7 @@ class SceneCore
         {
             this.sceneRenderer.add(drawable.object, lights.length > 0)
             if (drawable.isRayCastable)
-                this.raycast.add(sceneObject.name, drawable.object)
+                this.raycaster.add(sceneObject.name, drawable.object)
         }
         for (let light of lights)  
             this.sceneRenderer.add(light.object, false)
@@ -560,7 +449,7 @@ class SceneCore
         {    
             this.sceneRenderer.remove(drawable.object)
             if (drawable.isRayCastable)
-                this.raycast.remove(sceneObject.name)
+                this.raycaster.remove(sceneObject.name)
         }
         for (let light of lights)
             this.sceneRenderer.remove(light.object)

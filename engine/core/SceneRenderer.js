@@ -13,106 +13,15 @@ import { ColorBalancePass } from './pass/ColorBalancePass.js'
 import { ShaderPass } from '../../node_modules/three/examples/jsm/postprocessing/ShaderPass.js'
 import { SSAOPass } from '../../node_modules/three/examples/jsm/postprocessing/SSAOPass.js'
 import { SSAARenderPass } from '../../node_modules/three/examples/jsm/postprocessing/SSAARenderPass.js'
+import { OutlinePass } from '../../node_modules/three/examples/jsm/postprocessing/OutlinePass.js'
 import { FXAAShader } from '../../node_modules/three/examples/jsm/shaders/FXAAShader.js'
 import { Misc } from '../helpers/misc.js'
 import { Stats } from './Stats.js'
 
 /**
- * Wraps SceneRendererCore object
- */
-export class SceneRenderer
-{
-    /**
-     * @param {HTMLCanvasElement} canvas HTML canvas element
-     */
-    constructor(canvas) { this.core = new SceneRendererCore(canvas) }
-
-    /**
-     * Delegates call to SceneRendererCore add
-     * @param {String} name name of the sceneObject that is registered in the scene manager.
-     * @param {THREE.Object3D} threeJsObject the threejsobject to be rendered or included in the threejs scene
-     * @param {Boolean} isLuminant if true then the objet3D will be rendered with bloom effect
-     */
-    add(name, threeJsObject, isLuminant) { this.core.add(name, threeJsObject, isLuminant) }
-
-    /**
-     * Delegates call to SceneRendererCore remove
-     * @param {String} name name of the sceneObject that is registered in the scene manager.
-     */
-    remove(name) { this.core.remove(name) }
-
-    /**
-     * Delegates call to SceneRendererCore setup
-     * @param {THREE.Camera} threeJsCamera threejs camera object
-     */
-    setup(threeJsCamera) { this.core.setup(threeJsCamera) }
-
-    /**
-     * Delegates call to SceneRendererCore shouldPause
-     * @param {Boolean} pause if true then the render loop will stop
-     */
-    shouldPause(pause) { this.core.shouldPause(pause) }
-
-    setEnvironmentMap(envmap) { this.core.setEnvironmentMap(envmap) }
-
-    setBloomPercentage(percent) { this.core.setBloomPercentage(percent) }
-
-    setBloomIntensity(intensity) { this.core.setBloomIntensity(intensity) }
-
-    setBloomThreshold(threshold) { this.core.setBloomThreshold(threshold) }
-
-    setBloomRadius(radius) { this.core.setBloomRadius(radius) }
-
-    enableSSAO(enable) { this.core.enableSSAO(enable) }
-
-    setSSAORadius(radius) { this.core.setSSAORadius(radius) }
-
-    setSSAOMinDistance(minDist) { this.core.setSSAOMinDistance(minDist) }
-
-    setSSAOMaxDistance(maxDist) { this.core.setSSAOMaxDistance(maxDist) }
-
-    setSSAOShowAOMap(show) { this.core.setSSAOShowAOMap(show) }
-
-    setSSAOShowNormalMap(show) { this.core.setSSAOShowNormalMap(show) }
-
-    setSharpness(sharpness) { this.core.setSharpness(sharpness) }
-
-    enableFXAA(enable) { this.core.enableFXAA(enable) }
-
-    enableSSAA(enable) { this.core.enableSSAA(enable) }
-
-    setSSAASampleLevel(samplelevel) { this.core.setSSAASampleLevel(samplelevel) }
-
-    setShadowsColorBalance(shadowsRgb) { this.core.setShadowsColorBalance(shadowsRgb) }
-
-    setMidtonesColorBalance(midtonesRgb) { this.core.setMidtonesColorBalance(midtonesRgb) }
-
-    setHighlightsColorBalance(highlightsRgb) { this.core.setHighlightsColorBalance(highlightsRgb) }
-
-    setToneMapping(toneMapping) { this.core.setToneMapping(toneMapping) }
-
-    setExposure(exposure) { this.core.setExposure(exposure) }
-
-    setSaturation(saturation) { this.core.setSaturation(saturation) }
-
-    setContrast(contrast) { this.core.setContrast(contrast) }
-    
-    setBrightness(brightness) { this.core.setBrightness(brightness) }
-
-    setGamma(gamma) { this.core.setGamma(gamma) }
-
-    showStats(htmlElement) { this.core.showStats(htmlElement) }
-    
-    /**
-     * Delegates call to SceneRendererCore render
-     */
-    render() { this.core.render() }
-}
-
-/**
  * Responsible for rendering the overall scene
  */
-class SceneRendererCore
+export class SceneRenderer
 {
     /**
      * @param {HTMLCanvasElement} canvas HTML canvas element
@@ -146,6 +55,7 @@ class SceneRendererCore
         this.renderPass = null
         this.ssaoPass = null
         this.ssaaPass = null
+        this.outlinePass = null
         this.pixelMergerPass = new PixelMergerPass(this.sceneRenderComposer.readBuffer.texture, this.ssaoComposer.readBuffer.texture)
         this.saturationPass = new SaturationPass(1)
         this.contrastPass = new ContrastPass(0)
@@ -170,6 +80,7 @@ class SceneRendererCore
         this.fxaaEnabled = true
         this.ssaaEnabled = false
         this.ssaoEnabled = true
+        this.outlining = false
         this.blackMaterial = new THREE.MeshBasicMaterial({color: new THREE.Color(0, 0, 0)})
 
         this.stats = null
@@ -279,6 +190,18 @@ class SceneRendererCore
     setBrightness(brightness) { this.brightnessPass.setBrightness(brightness) }
 
     showStats(htmlElement) { this.stats = new Stats(this.renderer, htmlElement) }
+
+    outlineObjects(threeJsObjects, threeJsCamera)
+    {
+        if (!this.outlining && threeJsCamera != undefined && threeJsCamera != null)
+        {
+            this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, threeJsCamera)
+            this.sceneRenderComposer.insertPass(this.outlinePass, 1)
+            this.outlining = true
+        }
+        if (this.outlining)
+            this.outlinePass.selectedObjects = threeJsObjects
+    }
 
     /**
      * This function adds the threejs object based on its properties. If the threejs object is light, then it will be
