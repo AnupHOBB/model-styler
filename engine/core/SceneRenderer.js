@@ -25,12 +25,13 @@ export class SceneRenderer
 {
     /**
      * @param {HTMLCanvasElement} canvas HTML canvas element
+     * @param {Boolean} saveDrawBuffer if true then the contents of the read buffer wont be deleted after displaying
      */
-    constructor(canvas)
+    constructor(canvas, saveDrawBuffer)
     {
         this.shouldRender = false
         this.scene = new THREE.Scene()
-        this.renderer = new THREE.WebGLRenderer({canvas, alpha: true})
+        this.renderer = new THREE.WebGLRenderer({canvas, alpha: true, preserveDrawingBuffer: (saveDrawBuffer != undefined && saveDrawBuffer != null) ? saveDrawBuffer : false})
         this.renderer.shadowMap.enabled = true
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
         this.renderer.toneMapping = THREE.LinearToneMapping

@@ -174,14 +174,18 @@ export class SceneObjectGroup extends SceneObject
  */
 export class SceneManager
 {
-    constructor(canvas)
+    /**
+     * @param {HTMLCanvasElement} canvas HTML canvas element
+     * @param {Boolean} saveDrawBuffer if true then the contents of the read buffer wont be deleted after displaying
+     */
+    constructor(canvas, saveDrawBuffer)
     {
         this.raycaster = new RayCast()
         this.activeCameraManager = null
         this.sceneObjectMap = new Map()
         this.inactiveObjNameMap = new Map()
         this.messageMap = new Map()
-        this.sceneRenderer = new SceneRenderer(canvas)
+        this.sceneRenderer = new SceneRenderer(canvas, saveDrawBuffer)
         this.renderLoop()
     }
 

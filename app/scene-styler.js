@@ -25,7 +25,7 @@ window.onload = () =>
     loader.addLoader('Model', ASSET_FOLDER + MODEL_PATH, gltfLoader)
     loader.execute(p=>{}, assetMap => 
     {
-        let sceneManager = new ENGINE.SceneManager(document.querySelector('canvas'))
+        let sceneManager = new ENGINE.SceneManager(document.querySelector('canvas'), true)
         let cameraManager = new ENGINE.StaticCameraManager('Camera', 50)
         sceneManager.register(cameraManager)
         sceneManager.setActiveCamera('Camera')
@@ -58,5 +58,17 @@ window.onload = () =>
             if (hitData.length > 0)
                 selectedModel = hitData[0].object
         })
+
+        let downloadBtn = document.getElementById('download-btn')
+        downloadBtn.addEventListener('click', e=>downloadSceneAsImage(canvas))
     })
+}
+
+function downloadSceneAsImage(canvas)
+{
+    var link = document.createElement('a');
+    link.download = 'filename.jpg';
+    link.href = canvas.toDataURL('image/jpeg')
+    link.click();
+    alert('download complete')
 }
