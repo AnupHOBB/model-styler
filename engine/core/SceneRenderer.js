@@ -218,7 +218,7 @@ export class SceneRenderer
         if (threeJsObject.isLight != undefined)  
             this.addToScene(threeJsObject)
         else
-        {
+        { 
             if (isLuminant)
                 this.bloomObjects.push(threeJsObject)
             else
