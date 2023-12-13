@@ -10,7 +10,7 @@ window.onload = () =>
     const ENV_MAP_PATH = 'CGSkies_0339_freecopy.webp'
     const MODEL_PATH = '1bhk.glb'
     const TEXTURES_PATHS = ['00_Fab_13.png', '00_Fab_14.png', '00_Fab_15.png']
-    const Y_OFFSET = -68
+    const Y_OFFSET = 0//-68
 
     const textures = []
     let selectedModel
